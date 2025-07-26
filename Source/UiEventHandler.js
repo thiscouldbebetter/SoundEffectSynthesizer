@@ -17,6 +17,8 @@ class UiEventHandler
 			}
 		);
 		voicesAsOptions.forEach(x => selectVoice.appendChild(x) );
+
+		this.selectVoice_Changed(selectVoice);
 	}
 
 	static buttonPlay_Clicked()
@@ -48,5 +50,18 @@ class UiEventHandler
 		);
 
 		sequence.play();
+	}
+
+	static selectVoice_Changed(selectVoice)
+	{
+		var d = document;
+
+		var voiceName = selectVoice.value;
+		var voice = Voice.byName(voiceName);
+
+		var inputVoiceParameters =
+			d.getElementById("inputVoiceParameters");
+
+		inputVoiceParameters.value = voice.parametersDefault;
 	}
 }

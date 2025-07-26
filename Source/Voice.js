@@ -1,10 +1,13 @@
 
 class Voice
 {
-	constructor(name, oscillatorBuild)
+	constructor(name, parametersDefault, oscillatorBuild)
 	{
 		this.name = name;
+		this.parametersDefault = parametersDefault || "";
 		this._oscillatorBuild = oscillatorBuild;
+
+		this.parameters = parametersDefault;
 	}
 
 	static Instances()
@@ -31,16 +34,21 @@ class Voice_Instances
 {
 	constructor()
 	{
-		this.Horn = new Voice("Horn", this.oscillatorBuild_Horn);
-		this.Noise = new Voice("Noise", this.oscillatorBuild_Noise);
-		this.SawtoothWave = new Voice("Sawtooth Wave", this.oscillatorBuild_SawtoothWave);
-		this.SineWave = new Voice("Sine Wave", this.oscillatorBuild_SineWave);
-		this.SquareWave = new Voice("Square Wave", this.oscillatorBuild_SquareWave);
-		this.TriangleWave = new Voice("Triangle Wave", this.oscillatorBuild_TriangleWave);
+		this.Harmonics = new Voice
+		(
+			"Harmonics",
+			"0,40,40,100,100,100,30,70,60,50,90,80",
+			this.oscillatorBuild_Harmonics
+		);
+		this.Noise 			= new Voice("Noise", null, this.oscillatorBuild_Noise);
+		this.SawtoothWave 	= new Voice("Sawtooth Wave", null, this.oscillatorBuild_SawtoothWave);
+		this.SineWave 		= new Voice("Sine Wave", null, this.oscillatorBuild_SineWave);
+		this.SquareWave 	= new Voice("Square Wave", null, this.oscillatorBuild_SquareWave);
+		this.TriangleWave 	= new Voice("Triangle Wave", null, this.oscillatorBuild_TriangleWave);
 
 		this._All =
 		[
-			this.Horn,
+			this.Harmonics,
 			this.Noise,
 			this.SawtoothWave,
 			this.SineWave,
@@ -53,13 +61,18 @@ class Voice_Instances
 
 	// Oscillators.
 
-	oscillatorBuild_Horn(audio)
+	oscillatorBuild_Harmonics(audio)
 	{
 		var oscillator = audio.createOscillator();
 
 		// Adapted from tutorial code found at the URL:
 		// "https://www.sitepoint.com/using-fourier-transforms-web-audio-api/".
-		var real = new Float32Array([0,0.4,0.4,1,1,1,0.3,0.7,0.6,0.5,0.9,0.8]);
+
+		var harmonicAmplitudesAsPercentagesAsStrings =
+			this.parameters.split(",");
+		var harmonicAmplitudesAsFractions =
+			harmonicAmplitudesAsPercentagesAsStrings.map(x => parseInt(x) / 100 );
+		var real = new Float32Array(harmonicAmplitudesAsFractions);
 		var imaginary = new Float32Array(real.length); // For phasing?
 		var hornTable = audio.createPeriodicWave(real, imaginary);
 		oscillator.setPeriodicWave(hornTable);
@@ -73,6 +86,7 @@ class Voice_Instances
 
 		// Adapted from tutorial code found at the URL:
 		// "https://noisehack.com/generate-noise-web-audio-api/".
+
 		var bufferSize = 2 * audio.sampleRate;
 		var noiseBuffer = audio.createBuffer(1, bufferSize, audio.sampleRate);
 		var output = noiseBuffer.getChannelData(0);

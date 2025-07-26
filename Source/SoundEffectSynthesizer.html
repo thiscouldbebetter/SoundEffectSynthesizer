@@ -5,19 +5,30 @@
 
 	<h3>Sound Effect Synthesizer</h3>
 
-	<label>Duration in Seconds:</label>
+	<label for="inputDurationInSeconds">Duration in Seconds:</label>
 	<input id="inputDurationInSeconds" type="number" value="1"></input>
 	<br />
 
-	<label>Voice:</label>
-	<select id="selectVoice"></select>
+	<label for="selectVoice">
+		Voice:
+	</label>
+	<select
+		id="selectVoice"
+		onchange="UiEventHandler.selectVoice_Changed(this)"
+	></select>
+	<label for="inputVoiceParameters">Parameters:</label>
+	<input id="inputVoiceParameters" style="width:256px"></input>
 	<br />
 
-	<label>Pitches by Segment (in Hz):</label>
+	<label for="inputPitchesBySegmentInHertz">
+		Pitches by Segment (in Hz):
+	</label>
 	<input id="inputPitchesBySegmentInHertz" value="880,1760"></input>
 	<br />
 
-	<label>Volumes by Segment (as %):</label>
+	<label for="inputVolumesBySegmentAsPercentages">
+		Volumes by Segment (as %):
+	</label>
 	<input id="inputVolumesBySegmentAsPercentages" value="10,10,5,3,1,1,1"></input>
 	<br />
 
