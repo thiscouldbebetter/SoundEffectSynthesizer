@@ -1,5 +1,5 @@
 <html>
-<body>
+<body onload="UiEventHandler.body_Loaded()">
 
 <div id="divUi">
 
@@ -10,14 +10,7 @@
 	<br />
 
 	<label>Voice:</label>
-	<select id="selectOscillatorType">
-		<option>sine</option>
-		<option>horn</option>
-		<option>noise</option>
-		<option>sawtooth</option>
-		<option>square</option>
-		<option>triangle</option>
-	</select>
+	<select id="selectVoice"></select>
 	<br />
 
 	<label>Pitches by Segment (in Hz):</label>
@@ -28,153 +21,13 @@
 	<input id="inputVolumesBySegmentAsPercentages" value="10,10,5,3,1,1,1"></input>
 	<br />
 
-	<button onclick="buttonPlay_Clicked();">Play</button>
+	<button onclick="UiEventHandler.buttonPlay_Clicked();">Play</button>
 </div>
 
-<script type="text/javascript">
-
-function buttonPlay_Clicked()
-{
-	var d = document;
-	var inputDurationInSeconds = d.getElementById("inputDurationInSeconds");
-	var durationInSeconds = parseFloat(inputDurationInSeconds.value);
-
-	var selectOscillatorType = d.getElementById("selectOscillatorType");
-	var oscillatorTypeName = selectOscillatorType.value;
-
-	var inputPitchesBySegment = d.getElementById("inputPitchesBySegmentInHertz");
-	var pitchesBySegmentAsString = inputPitchesBySegment.value;
-	var pitchesAsStrings = pitchesBySegmentAsString.split(",");
-	var pitches = pitchesAsStrings.map(x => parseFloat(x));
-
-	var inputVolumesBySegment = d.getElementById("inputVolumesBySegmentAsPercentages");
-	var volumesBySegmentAsString = inputVolumesBySegment.value;
-	var volumesAsStrings = volumesBySegmentAsString.split(",");
-	var volumes = volumesAsStrings.map(x => parseFloat(x) / 100);
-
-	var pitchCount = pitches.length;
-	var volumeCount = volumes.length;
-	var segmentCount = Math.max(pitchCount, volumeCount);
-	var segmentDurationInSeconds = durationInSeconds / segmentCount;
-
-	var notes = [];
-	var noteOffsetInSeconds = 0;
-	for (var s = 0; s < segmentCount; s++)
-	{
-		var pitch = pitches[s] || pitches[pitches.length - 1];
-		var volume = volumes[s] || volumes[volumes.length - 1];
-		var note = new Note
-		(
-			noteOffsetInSeconds, pitch, volume, segmentDurationInSeconds
-		);
-		notes.push(note);
-
-		noteOffsetInSeconds += segmentDurationInSeconds;
-	}
-
-	var sequence = new Sequence(durationInSeconds, oscillatorTypeName, notes);
-	sequence.play();
-}
-
-// Classes.
-
-class Note
-{
-	constructor(offsetInSeconds, pitchInHertz, volumeAsFractionOfMax, durationInSeconds)
-	{
-		this.offsetInSeconds = offsetInSeconds;
-		this.pitchInHertz = pitchInHertz;
-		this.volumeAsFractionOfMax = volumeAsFractionOfMax;
-		this.durationInSeconds = durationInSeconds;
-	}
-
-	setGainAndOscillator(gain, oscillator)
-	{
-		gain.gain.setValueAtTime
-		(
-			this.volumeAsFractionOfMax, this.offsetInSeconds
-		);
-
-		oscillator.frequency.setValueAtTime
-		(
-			this.pitchInHertz, this.offsetInSeconds
-		);
-	}
-}
-
-class Sequence
-{
-	constructor(durationInSeconds, oscillatorTypeName, notes)
-	{
-		this.durationInSeconds = durationInSeconds;
-		this.oscillatorTypeName = oscillatorTypeName;
-		this.notes = notes;
-	}
-
-	play()
-	{
-		var audio = new AudioContext();
-		var gain = audio.createGain();
-		var oscillator = audio.createOscillator();
-
-		if (this.oscillatorTypeName == "noise")
-		{
-			// Adapted from tutorial code found at the URL:
-			// "https://noisehack.com/generate-noise-web-audio-api/".
-			var bufferSize = 2 * audio.sampleRate;
-			var noiseBuffer = audio.createBuffer(1, bufferSize, audio.sampleRate);
-			var output = noiseBuffer.getChannelData(0);
-			for (var i = 0; i < bufferSize; i++)
-			{
-				output[i] = Math.random() * 2 - 1;
-			}
-
-			var noise = audio.createBufferSource();
-			noise.buffer = noiseBuffer;
-			noise.loop = true;
-
-			// Adapted from tutorial code found at the URL:
-			// "https://developer.cdn.mozilla.net/en-US/docs/Web/API/Web_Audio_API/Advanced_techniques#The_noise_%E2%80%94_random_noise_buffer_with_biquad_filter";
-			var filter = audio.createBiquadFilter();
-			filter.type = "bandpass";
-			noise.connect(filter);
-			filter.input = noise; // hack - Because there's no .start() on the filter.
-
-			oscillator = filter;
-		}
-		else if (this.oscillatorTypeName == "horn")
-		{
-			// Adapted from tutorial code found at the URL:
-			// "https://www.sitepoint.com/using-fourier-transforms-web-audio-api/".
-			var real = new Float32Array([0,0.4,0.4,1,1,1,0.3,0.7,0.6,0.5,0.9,0.8]);
-			var imaginary = new Float32Array(real.length); // For phasing?
-			var hornTable = audio.createPeriodicWave(real, imaginary);
-			oscillator.setPeriodicWave(hornTable);
-		}
-		else
-		{
-			oscillator.type = this.oscillatorTypeName;
-		}
-
-		this.notes.forEach
-		(
-			note => note.setGainAndOscillator(gain, oscillator)
-		);
-
-		gain.connect(audio.destination);
-		oscillator.connect(gain);
-
-		if (oscillator.start == null)
-		{
-			oscillator = oscillator.input;
-		}
-
-		oscillator.start();
-		oscillator.stop(this.durationInSeconds);
-	}
-}
-
-</script>
+<script type="text/javascript" src="Note.js"></script>
+<script type="text/javascript" src="Sequence.js"></script>
+<script type="text/javascript" src="UiEventHandler.js"></script>
+<script type="text/javascript" src="Voice.js"></script>
 
 </body>
 </html>
