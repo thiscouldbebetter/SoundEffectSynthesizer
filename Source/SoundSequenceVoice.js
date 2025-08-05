@@ -1,5 +1,5 @@
 
-class Voice
+class SoundSequenceVoice
 {
 	constructor(name, parametersDefault, oscillatorBuild)
 	{
@@ -10,11 +10,19 @@ class Voice
 		this.parameters = parametersDefault;
 	}
 
+	static fromNameParametersDefaultAndOscillatorBuild
+	(
+		name, parametersDefault, oscillatorBuild
+	)
+	{
+		return new SoundSequenceVoice(name, parametersDefault, oscillatorBuild);
+	}
+
 	static Instances()
 	{
 		if (this._instances == null)
 		{
-			this._instances = new Voice_Instances();
+			this._instances = new SoundSequenceVoice_Instances();
 		}
 		return this._instances;
 	}
@@ -30,21 +38,25 @@ class Voice
 	}
 }
 
-class Voice_Instances
+class SoundSequenceVoice_Instances
 {
 	constructor()
 	{
-		this.Harmonics = new Voice
+		var v =
+			(n, pd, ob) =>
+				SoundSequenceVoice.fromNameParametersDefaultAndOscillatorBuild(n, pd, ob);
+
+		this.Harmonics = v
 		(
 			"Harmonics",
 			"0,40,40,100,100,100,30,70,60,50,90,80",
 			this.oscillatorBuild_Harmonics
 		);
-		this.Noise 			= new Voice("Noise", null, this.oscillatorBuild_Noise);
-		this.SawtoothWave 	= new Voice("Sawtooth Wave", null, this.oscillatorBuild_SawtoothWave);
-		this.SineWave 		= new Voice("Sine Wave", null, this.oscillatorBuild_SineWave);
-		this.SquareWave 	= new Voice("Square Wave", null, this.oscillatorBuild_SquareWave);
-		this.TriangleWave 	= new Voice("Triangle Wave", null, this.oscillatorBuild_TriangleWave);
+		this.Noise 			= v("Noise", null, this.oscillatorBuild_Noise);
+		this.SawtoothWave 	= v("Sawtooth Wave", null, this.oscillatorBuild_SawtoothWave);
+		this.SineWave 		= v("Sine Wave", null, this.oscillatorBuild_SineWave);
+		this.SquareWave 	= v("Square Wave", null, this.oscillatorBuild_SquareWave);
+		this.TriangleWave 	= v("Triangle Wave", null, this.oscillatorBuild_TriangleWave);
 
 		this._All =
 		[

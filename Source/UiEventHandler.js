@@ -6,7 +6,7 @@ class UiEventHandler
 		var d = document;
 
 		var selectVoice = d.getElementById("selectVoice");
-		var voices = Voice.Instances()._All;
+		var voices = SoundSequenceVoice.Instances()._All;
 		var voicesAsOptions = voices.map
 		(
 			voice =>
@@ -31,7 +31,7 @@ class UiEventHandler
 
 		var selectVoice = d.getElementById("selectVoice");
 		var voiceName = selectVoice.value;
-		var voice = Voice.byName(voiceName);
+		var voice = SoundSequenceVoice.byName(voiceName);
 
 		var inputPitchesBySegment =
 			d.getElementById("inputPitchesBySegmentInHertz");
@@ -41,7 +41,7 @@ class UiEventHandler
 			d.getElementById("inputVolumesBySegmentAsPercentages");
 		var volumesBySegmentAsString = inputVolumesBySegment.value;
 
-		var sequence = Sequence.fromDurationVoiceAndStringsForPitchesAndDurations
+		var sequence = SoundSequence.fromDurationVoiceAndStringsForPitchesAndDurations
 		(
 			durationInSeconds,
 			voice,
@@ -57,7 +57,7 @@ class UiEventHandler
 		var d = document;
 
 		var voiceName = selectVoice.value;
-		var voice = Voice.byName(voiceName);
+		var voice = SoundSequenceVoice.byName(voiceName);
 
 		var inputVoiceParameters =
 			d.getElementById("inputVoiceParameters");

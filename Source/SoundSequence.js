@@ -1,11 +1,16 @@
 
-class Sequence
+class SoundSequence
 {
 	constructor(durationInSeconds, voice, notes)
 	{
 		this.durationInSeconds = durationInSeconds;
 		this.voice = voice;
 		this.notes = notes;
+	}
+
+	static fromDurationVoiceAndNotes(durationInSeconds, voice, notes)
+	{
+		return new SoundSequence(durationInSeconds, voice, notes);
 	}
 
 	static fromDurationVoiceAndStringsForPitchesAndDurations
@@ -33,7 +38,7 @@ class Sequence
 		{
 			var pitch = pitches[s] || pitches[pitches.length - 1];
 			var volume = volumes[s] || volumes[volumes.length - 1];
-			var note = new Note
+			var note = SoundSequenceNote.fromOffsetPitchVolumeAndDuration
 			(
 				noteOffsetInSeconds, pitch, volume, segmentDurationInSeconds
 			);
@@ -42,7 +47,7 @@ class Sequence
 			noteOffsetInSeconds += segmentDurationInSeconds;
 		}
 
-		var sequence = new Sequence(durationInSeconds, voice, notes);
+		var sequence = new SoundSequence(durationInSeconds, voice, notes);
 		return sequence;
 	}
 
