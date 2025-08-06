@@ -8,6 +8,8 @@ export class SoundSequence
 	voice: SoundSequenceVoice;
 	notes: SoundSequenceNote[];
 
+	oscillator: any;
+
 	constructor
 	(
 		durationInSeconds: number,
@@ -25,7 +27,7 @@ export class SoundSequence
 		durationInSeconds: number,
 		voice: SoundSequenceVoice,
 		notes: SoundSequenceNote[]
-	)
+	): SoundSequence
 	{
 		return new SoundSequence(durationInSeconds, voice, notes);
 	}
@@ -36,7 +38,7 @@ export class SoundSequence
 		voice: SoundSequenceVoice,
 		pitchesBySegmentAsString: string,
 		volumesBySegmentAsString: string
-	)
+	): SoundSequence
 	{
 		var pitchesAsStrings = pitchesBySegmentAsString.split(",");
 		var pitches = pitchesAsStrings.map(x => parseFloat(x));
@@ -68,7 +70,7 @@ export class SoundSequence
 		return sequence;
 	}
 
-	play()
+	play(): void
 	{
 		var audio = new AudioContext();
 		var gain = audio.createGain();
@@ -89,6 +91,16 @@ export class SoundSequence
 
 		oscillator.start();
 		oscillator.stop(this.durationInSeconds);
+
+		this.oscillator = oscillator;
+	}
+
+	stop(): void
+	{
+		if (this.oscillator != null)
+		{
+			this.oscillator.stop(0);
+		}
 	}
 }
 
