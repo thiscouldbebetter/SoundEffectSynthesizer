@@ -55,6 +55,12 @@ var ThisCouldBeBetter;
                 }
                 oscillator.start();
                 oscillator.stop(this.durationInSeconds);
+                this.oscillator = oscillator;
+            }
+            stop() {
+                if (this.oscillator != null) {
+                    this.oscillator.stop(0);
+                }
             }
             pitchesInHertzBySegmentAsString() {
                 return this.notes.map(x => x.pitchInHertz).join(",");
