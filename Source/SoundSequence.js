@@ -4,15 +4,19 @@ var ThisCouldBeBetter;
     var SoundEffectSynthesizer;
     (function (SoundEffectSynthesizer) {
         class SoundSequence {
-            constructor(durationInSeconds, voice, notes) {
+            constructor(name, durationInSeconds, voice, notes) {
+                this.name = name;
                 this.durationInSeconds = durationInSeconds;
                 this.voice = voice;
                 this.notes = notes;
             }
-            static fromDurationVoiceAndNotes(durationInSeconds, voice, notes) {
-                return new SoundSequence(durationInSeconds, voice, notes);
+            static byName(name) {
+                return SoundSequence.Instances().byName(name);
             }
-            static fromDurationVoiceAndStringsForPitchesAndDurations(durationInSeconds, voice, pitchesBySegmentAsString, volumesBySegmentAsString) {
+            static fromNameDurationVoiceAndNotes(name, durationInSeconds, voice, notes) {
+                return new SoundSequence(name, durationInSeconds, voice, notes);
+            }
+            static fromNameDurationVoiceAndStringsForPitchesAndDurations(name, durationInSeconds, voice, pitchesBySegmentAsString, volumesBySegmentAsString) {
                 var pitchesAsStrings = pitchesBySegmentAsString.split(",");
                 var pitches = pitchesAsStrings.map(x => parseFloat(x));
                 var volumesAsStrings = volumesBySegmentAsString.split(",");
@@ -30,8 +34,14 @@ var ThisCouldBeBetter;
                     notes.push(note);
                     noteOffsetInSeconds += segmentDurationInSeconds;
                 }
-                var sequence = new SoundSequence(durationInSeconds, voice, notes);
+                var sequence = new SoundSequence(name, durationInSeconds, voice, notes);
                 return sequence;
+            }
+            static Instances() {
+                if (this._instances == null) {
+                    this._instances = new SoundSequence_Instances();
+                }
+                return this._instances;
             }
             play() {
                 var audio = new AudioContext();
@@ -46,7 +56,29 @@ var ThisCouldBeBetter;
                 oscillator.start();
                 oscillator.stop(this.durationInSeconds);
             }
+            pitchesInHertzBySegmentAsString() {
+                return this.notes.map(x => x.pitchInHertz).join(",");
+            }
+            volumesAsPercentagesBySegmentAsString() {
+                return this.notes.map(x => x.volumeAsFractionOfMax * 100).join(",");
+            }
         }
         SoundEffectSynthesizer.SoundSequence = SoundSequence;
+        class SoundSequence_Instances {
+            constructor() {
+                var voices = SoundEffectSynthesizer.SoundSequenceVoice.Instances();
+                var ss = (n, dis, v, pas, das) => SoundSequence.fromNameDurationVoiceAndStringsForPitchesAndDurations(n, dis, v, pas, das);
+                this.Bahding = ss("Bahding", 1, voices.Harmonics, "880,1760", "10,10,5,3,1,1,1");
+                this.Dahbing = ss("Dahbing", 1, voices.Harmonics, "1760,880", "10,10,5,3,1,1,1");
+                this._All =
+                    [
+                        this.Bahding,
+                        this.Dahbing
+                    ];
+            }
+            byName(name) {
+                return this._All.find(x => x.name == name);
+            }
+        }
     })(SoundEffectSynthesizer = ThisCouldBeBetter.SoundEffectSynthesizer || (ThisCouldBeBetter.SoundEffectSynthesizer = {}));
 })(ThisCouldBeBetter || (ThisCouldBeBetter = {}));

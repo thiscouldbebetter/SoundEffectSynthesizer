@@ -4,34 +4,44 @@ namespace ThisCouldBeBetter.SoundEffectSynthesizer
 
 export class SoundSequence
 {
+	name: string;
 	durationInSeconds: number;
 	voice: SoundSequenceVoice;
 	notes: SoundSequenceNote[];
 
 	constructor
 	(
+		name: string,
 		durationInSeconds: number,
 		voice: SoundSequenceVoice,
 		notes: SoundSequenceNote[]
 	)
 	{
+		this.name = name;
 		this.durationInSeconds = durationInSeconds;
 		this.voice = voice;
 		this.notes = notes;
 	}
 
-	static fromDurationVoiceAndNotes
+	static byName(name: string): SoundSequence
+	{
+		return SoundSequence.Instances().byName(name);
+	}
+
+	static fromNameDurationVoiceAndNotes
 	(
+		name: string,
 		durationInSeconds: number,
 		voice: SoundSequenceVoice,
 		notes: SoundSequenceNote[]
 	)
 	{
-		return new SoundSequence(durationInSeconds, voice, notes);
+		return new SoundSequence(name, durationInSeconds, voice, notes);
 	}
 
-	static fromDurationVoiceAndStringsForPitchesAndDurations
+	static fromNameDurationVoiceAndStringsForPitchesAndDurations
 	(
+		name: string,
 		durationInSeconds: number,
 		voice: SoundSequenceVoice,
 		pitchesBySegmentAsString: string,
@@ -64,8 +74,18 @@ export class SoundSequence
 			noteOffsetInSeconds += segmentDurationInSeconds;
 		}
 
-		var sequence = new SoundSequence(durationInSeconds, voice, notes);
+		var sequence = new SoundSequence(name, durationInSeconds, voice, notes);
 		return sequence;
+	}
+
+	static _instances: SoundSequence_Instances;
+	static Instances(): SoundSequence_Instances
+	{
+		if (this._instances == null)
+		{
+			this._instances = new SoundSequence_Instances();
+		}
+		return this._instances;
 	}
 
 	play()
@@ -89,6 +109,48 @@ export class SoundSequence
 
 		oscillator.start();
 		oscillator.stop(this.durationInSeconds);
+	}
+
+	pitchesInHertzBySegmentAsString(): string
+	{
+		return this.notes.map(x => x.pitchInHertz).join(",");
+	}
+
+	volumesAsPercentagesBySegmentAsString(): string
+	{
+		return this.notes.map(x => x.volumeAsFractionOfMax * 100).join(",");
+	}
+
+}
+
+class SoundSequence_Instances
+{
+	Bahding: SoundSequence;
+	Dahbing: SoundSequence;
+
+	_All: SoundSequence[];
+
+	constructor()
+	{
+		var voices = SoundSequenceVoice.Instances();
+
+		var ss =
+			(n: string, dis: number, v: SoundSequenceVoice, pas: string, das: string) =>
+				SoundSequence.fromNameDurationVoiceAndStringsForPitchesAndDurations(n, dis, v, pas, das);
+
+		this.Bahding = ss("Bahding", 1, voices.Harmonics, "880,1760", "10,10,5,3,1,1,1" );
+		this.Dahbing = ss("Dahbing", 1, voices.Harmonics, "1760,880", "10,10,5,3,1,1,1" );
+
+		this._All =
+		[
+			this.Bahding,
+			this.Dahbing
+		];
+	}
+
+	byName(name: string): SoundSequence
+	{
+		return this._All.find(x => x.name == name);
 	}
 }
 

@@ -5,34 +5,59 @@
 
 	<h3>Sound Effect Synthesizer</h3>
 
-	<label for="inputDurationInSeconds">Duration in Seconds:</label>
-	<input id="inputDurationInSeconds" type="number" value="1"></input>
-	<br />
+	<p>
+		Specify a duration and voice, then a series of pitches and volumes for
+		time divisions within that duration, then click the Play button to
+		hear the corresponding sound effect.
+	</p>
 
-	<label for="selectVoice">
-		Voice:
-	</label>
-	<select
-		id="selectVoice"
-		onchange="UiEventHandler.selectVoice_Changed(this)"
-	></select>
-	<label for="inputVoiceParameters">Parameters:</label>
-	<input id="inputVoiceParameters" style="width:256px"></input>
-	<br />
+	<div>
+		<label>Sample Effects:</label>
+		<select
+			id="selectSampleEffect"
+			onchange="UiEventHandler.selectSampleEffect_Changed(this)"
+		></select>
+	</div>
 
-	<label for="inputPitchesBySegmentInHertz">
-		Pitches by Segment (in Hz):
-	</label>
-	<input id="inputPitchesBySegmentInHertz" value="880,1760"></input>
-	<br />
+	<div>
+		<label for="inputName">Name:</label>
+		<input id="inputName" value="Bahding"></input>
+	</div>
 
-	<label for="inputVolumesBySegmentAsPercentages">
-		Volumes by Segment (as %):
-	</label>
-	<input id="inputVolumesBySegmentAsPercentages" value="10,10,5,3,1,1,1"></input>
-	<br />
+	<div>
+		<label for="inputDurationInSeconds">Duration in Seconds:</label>
+		<input id="inputDurationInSeconds" type="number" value="1"></input>
+	</div>
 
-	<button onclick="UiEventHandler.buttonPlay_Clicked();">Play</button>
+	<div>
+		<label for="selectVoice">
+			Voice:
+		</label>
+		<select
+			id="selectVoice"
+			onchange="UiEventHandler.selectVoice_Changed(this)"
+		></select>
+		<label for="inputVoiceParameters">Parameters:</label>
+		<input id="inputVoiceParameters" style="width:256px"></input>
+	</div>
+
+	<div>
+		<label for="inputPitchesBySegmentInHertz">
+			Pitches by Segment (in Hz):
+		</label>
+		<input id="inputPitchesBySegmentInHertz" value="880,1760"></input>
+	</div>
+
+	<div>
+		<label for="inputVolumesBySegmentAsPercentages">
+			Volumes by Segment (as %):
+		</label>
+		<input id="inputVolumesBySegmentAsPercentages" value="10,10,5,3,1,1,1"></input>
+	</div>
+
+	<div>
+		<button onclick="UiEventHandler.buttonPlay_Clicked();">Play</button>
+	</div>
 </div>
 
 <script type="text/javascript" src="SoundSequence.js"></script>
