@@ -138,25 +138,54 @@ export class SoundSequence
 class SoundSequence_Instances
 {
 	Bahding: SoundSequence;
+	Chop: SoundSequence;
 	Dahbing: SoundSequence;
+	Falling: SoundSequence;
+	Rising: SoundSequence;
+	Slash: SoundSequence;
+	WaveCrash: SoundSequence;
 
 	_All: SoundSequence[];
 
 	constructor()
 	{
-		var voices = SoundSequenceVoice.Instances();
+		var vs = SoundSequenceVoice.Instances();
 
 		var ss =
 			(n: string, dis: number, v: SoundSequenceVoice, pas: string, das: string) =>
 				SoundSequence.fromNameDurationVoiceAndStringsForPitchesAndDurations(n, dis, v, pas, das);
 
-		this.Bahding = ss("Bahding", 1, voices.Harmonics, "880,1760", "10,10,5,3,1,1,1" );
-		this.Dahbing = ss("Dahbing", 1, voices.Harmonics, "1760,880", "10,10,5,3,1,1,1" );
+		var pitchesFalling = [];
+		for (var i = 0; i < 41; i++)
+		{
+			var pitch = 800 - i * 10;
+			pitchesFalling.push(pitch);
+		}
+
+		var pitchesRising = [];
+		for (var i = 0; i < 41; i++)
+		{
+			var pitch = 400 + i * 10;
+			pitchesRising.push(pitch);
+		}
+
+		this.Bahding 	= ss("Bahding", 	1, 		vs.Harmonics, 	"880,1760", 				"10,10,5,3,1,1,1" );
+		this.Chop 		= ss("Chop", 		0.25, 	vs.Noise, 		"1760,880", 				"10,10,5,3,1,1,1" );
+		this.Falling	= ss("Falling", 	0.25, 	vs.TriangleWave, pitchesFalling.join(","), 	"10");
+		this.Dahbing 	= ss("Dahbing", 	1, 		vs.Harmonics, 	"1760,880", 				"10,10,5,3,1,1,1" );
+		this.Rising		= ss("Rising", 		0.25, 	vs.TriangleWave, pitchesRising.join(","), 	"10");
+		this.Slash 		= ss("Slash", 		0.25, 	vs.Noise, 		"880,1760", 				"10,10,5,3,1,1,1" );
+		this.WaveCrash 	= ss("WaveCrash", 	1, 		vs.Noise,		"880,1760", 				"10,10,5,3,1,1,1" );
 
 		this._All =
 		[
 			this.Bahding,
-			this.Dahbing
+			this.Chop,
+			this.Dahbing,
+			this.Falling,
+			this.Rising,
+			this.Slash,
+			this.WaveCrash
 		];
 	}
 
