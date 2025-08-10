@@ -17,9 +17,10 @@ var ThisCouldBeBetter;
                 return new SoundSequence(name, durationInSeconds, voice, notes);
             }
             static fromNameDurationVoiceAndStringsForPitchesAndDurations(name, durationInSeconds, voice, pitchesBySegmentAsString, volumesBySegmentAsString) {
-                var pitchesAsStrings = pitchesBySegmentAsString.split(",");
+                var delimiter = "\n";
+                var pitchesAsStrings = pitchesBySegmentAsString.split(delimiter);
                 var pitches = pitchesAsStrings.map(x => parseFloat(x));
-                var volumesAsStrings = volumesBySegmentAsString.split(",");
+                var volumesAsStrings = volumesBySegmentAsString.split(delimiter);
                 var volumes = volumesAsStrings.map(x => parseFloat(x) / 100);
                 var pitchCount = pitches.length;
                 var volumeCount = volumes.length;
@@ -63,17 +64,19 @@ var ThisCouldBeBetter;
                 }
             }
             pitchesInHertzBySegmentAsString() {
-                return this.notes.map(x => x.pitchInHertz).join(",");
+                return this.notes.map(x => x.pitchInHertz).join("\n");
             }
             volumesAsPercentagesBySegmentAsString() {
-                return this.notes.map(x => x.volumeAsFractionOfMax * 100).join(",");
+                return this.notes.map(x => x.volumeAsFractionOfMax * 100).join("\n");
             }
         }
         SoundEffectSynthesizer.SoundSequence = SoundSequence;
         class SoundSequence_Instances {
             constructor() {
                 var vs = SoundEffectSynthesizer.SoundSequenceVoice.Instances();
-                var ss = (n, dis, v, pas, das) => SoundSequence.fromNameDurationVoiceAndStringsForPitchesAndDurations(n, dis, v, pas, das);
+                var comma = ",";
+                var newline = "\n";
+                var ss = (n, dis, v, pas, das) => SoundSequence.fromNameDurationVoiceAndStringsForPitchesAndDurations(n, dis, v, pas.split(comma).join(newline), das.split(comma).join(newline));
                 var pitchesFalling = [];
                 for (var i = 0; i < 41; i++) {
                     var pitch = 800 - i * 10;

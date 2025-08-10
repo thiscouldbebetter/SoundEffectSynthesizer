@@ -50,10 +50,14 @@ export class SoundSequence
 		volumesBySegmentAsString: string
 	): SoundSequence
 	{
-		var pitchesAsStrings = pitchesBySegmentAsString.split(",");
+		var delimiter = "\n";
+
+		var pitchesAsStrings =
+			pitchesBySegmentAsString.split(delimiter);
 		var pitches = pitchesAsStrings.map(x => parseFloat(x));
 
-		var volumesAsStrings = volumesBySegmentAsString.split(",");
+		var volumesAsStrings =
+			volumesBySegmentAsString.split(delimiter);
 		var volumes = volumesAsStrings.map(x => parseFloat(x) / 100);
 
 		var pitchCount = pitches.length;
@@ -125,12 +129,12 @@ export class SoundSequence
 
 	pitchesInHertzBySegmentAsString(): string
 	{
-		return this.notes.map(x => x.pitchInHertz).join(",");
+		return this.notes.map(x => x.pitchInHertz).join("\n");
 	}
 
 	volumesAsPercentagesBySegmentAsString(): string
 	{
-		return this.notes.map(x => x.volumeAsFractionOfMax * 100).join(",");
+		return this.notes.map(x => x.volumeAsFractionOfMax * 100).join("\n");
 	}
 
 }
@@ -151,9 +155,19 @@ class SoundSequence_Instances
 	{
 		var vs = SoundSequenceVoice.Instances();
 
+		var comma = ",";
+		var newline = "\n";
+
 		var ss =
 			(n: string, dis: number, v: SoundSequenceVoice, pas: string, das: string) =>
-				SoundSequence.fromNameDurationVoiceAndStringsForPitchesAndDurations(n, dis, v, pas, das);
+				SoundSequence.fromNameDurationVoiceAndStringsForPitchesAndDurations
+				(
+					n,
+					dis,
+					v,
+					pas.split(comma).join(newline),
+					das.split(comma).join(newline)
+				);
 
 		var pitchesFalling = [];
 		for (var i = 0; i < 41; i++)

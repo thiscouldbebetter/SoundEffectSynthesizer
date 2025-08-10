@@ -16,17 +16,24 @@
 		<select
 			id="selectSampleEffect"
 			onchange="UiEventHandler.selectSampleEffect_Changed(this)"
-		></select>
+		>
+			<option>-</option>
+		</select>
 	</div>
 
 	<div>
 		<label for="inputName">Name:</label>
-		<input id="inputName" value="Bahding"></input>
+		<input id="inputName" value="Untitled"></input>
 	</div>
 
 	<div>
 		<label for="inputDurationInSeconds">Duration in Seconds:</label>
-		<input id="inputDurationInSeconds" type="number" value="1"></input>
+		<input
+			id="inputDurationInSeconds"
+			type="number"
+			min="0" max="1000"
+			value="1"
+		></input>
 	</div>
 
 	<div>
@@ -41,19 +48,36 @@
 		<input id="inputVoiceParameters" style="width:256px"></input>
 	</div>
 
-	<div>
-		<label for="inputPitchesBySegmentInHertz">
-			Pitches by Segment (in Hz):
-		</label>
-		<input id="inputPitchesBySegmentInHertz" value="880,1760"></input>
-	</div>
-
-	<div>
-		<label for="inputVolumesBySegmentAsPercentages">
-			Volumes by Segment (as %):
-		</label>
-		<input id="inputVolumesBySegmentAsPercentages" value="10,10,5,3,1,1,1"></input>
-	</div>
+	<table>
+		<tr>
+			<td>
+				<label for="inputPitchesBySegmentInHertz">
+					Pitches by Segment (in Hz):
+				</label>
+			</td>
+			<td>
+				<label for="inputVolumesBySegmentAsPercentages">
+					Volumes by Segment (as %):
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<textarea
+					id="inputPitchesBySegmentInHertz"
+					cols="20"
+					rows="16"
+				></textarea>
+			</td>
+			<td>
+				<textarea
+					id="inputVolumesBySegmentAsPercentages"
+					cols="20"
+					rows="16"
+				></textarea>
+			</td>
+		</tr>
+	</table>
 
 	<div>
 		<button onclick="UiEventHandler.buttonPlay_Clicked();">Play</button>
