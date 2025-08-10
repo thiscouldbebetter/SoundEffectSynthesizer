@@ -1,5 +1,8 @@
 
-class UiEventHandler
+namespace ThisCouldBeBetter.SoundEffectSynthesizer
+{
+
+export class UiEventHandler
 {
 	static body_Loaded(): void
 	{
@@ -113,4 +116,6 @@ class UiEventHandler
 
 		inputVoiceParameters.value = voice.parametersDefault;
 	}
+}
+
 }
