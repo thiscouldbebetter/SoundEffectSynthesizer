@@ -17,9 +17,9 @@ var ThisCouldBeBetter;
                 gain.gain.setValueAtTime(this.volumeAsFractionOfMax, this.offsetInSeconds);
                 oscillator.frequency.setValueAtTime(this.pitchInHertz, this.offsetInSeconds);
             }
-            toSamples(voice, samplesPerSecond) {
+            toSamples(voice, samplesPerSecond, offsetInSeconds) {
                 var durationInSamples = samplesPerSecond * this.durationInSeconds;
-                var noteAsSamples = voice.samplesForNote(samplesPerSecond, durationInSamples, this.pitchInHertz, this.volumeAsFractionOfMax);
+                var noteAsSamples = voice.samplesForNote(samplesPerSecond, offsetInSeconds, this.pitchInHertz, this.volumeAsFractionOfMax, durationInSamples);
                 return noteAsSamples;
             }
         }

@@ -53,7 +53,8 @@ export class SoundSequenceNote
 	toSamples
 	(
 		voice: SoundSequenceVoice,
-		samplesPerSecond: number
+		samplesPerSecond: number,
+		offsetInSeconds: number
 	): number[]
 	{
 		var durationInSamples =
@@ -61,9 +62,10 @@ export class SoundSequenceNote
 		var noteAsSamples = voice.samplesForNote
 		(
 			samplesPerSecond,
-			durationInSamples,
+			offsetInSeconds,
 			this.pitchInHertz,
-			this.volumeAsFractionOfMax
+			this.volumeAsFractionOfMax,
+			durationInSamples
 		);
 		return noteAsSamples;
 	}

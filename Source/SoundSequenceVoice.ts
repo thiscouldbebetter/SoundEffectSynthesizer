@@ -8,7 +8,7 @@ export class SoundSequenceVoice
 	parametersDefault: string;
 	_oscillatorBuild: (voice: SoundSequenceVoice, audio: any) => any;
 	_sampleForFrequencyAndTime:
-		(frequencyInHertz: number, timeInSeconds: number) => number;
+		(voice: SoundSequenceVoice, frequencyInHertz: number, timeInSeconds: number) => number;
 
 	parameters: string;
 
@@ -17,7 +17,8 @@ export class SoundSequenceVoice
 		name: string,
 		parametersDefault: string,
 		oscillatorBuild: (voice: SoundSequenceVoice, audio: any) => any,
-		sampleForFrequencyAndTime: (frequencyInHertz: number, timeInSeconds: number) => number
+		sampleForFrequencyAndTime:
+			(voice: SoundSequenceVoice, frequencyInHertz: number, timeInSeconds: number) => number
 	)
 	{
 		this.name = name;
@@ -33,12 +34,16 @@ export class SoundSequenceVoice
 		name: string,
 		parametersDefault: string,
 		oscillatorBuild: (voice: SoundSequenceVoice, audio: any) => any,
-		sampleForFrequencyAndTime: (frequencyInHertz: number, timeInSeconds: number) => number
+		sampleForFrequencyAndTime:
+			(voice: SoundSequenceVoice, frequencyInHertz: number, timeInSeconds: number) => number
 	)
 	{
 		return new SoundSequenceVoice
 		(
-			name, parametersDefault, oscillatorBuild, sampleForFrequencyAndTime
+			name,
+			parametersDefault,
+			oscillatorBuild,
+			sampleForFrequencyAndTime
 		);
 	}
 
@@ -70,28 +75,34 @@ export class SoundSequenceVoice
 
 	sampleForFrequencyAndTime
 	(
-		frequencyInHertz: number, timeInSeconds: number
+		voice: SoundSequenceVoice,
+		frequencyInHertz: number,
+		timeInSeconds: number
 	): number
 	{
-		return this._sampleForFrequencyAndTime(frequencyInHertz, timeInSeconds);
+		return this._sampleForFrequencyAndTime(voice, frequencyInHertz, timeInSeconds);
 	}
 
 	samplesForNote
 	(
 		samplesPerSecond: number,
-		durationInSamples: number,
+		offsetInSeconds: number,
 		frequencyInHertz: number,
-		volumeAsFraction: number
+		volumeAsFraction: number,
+		durationInSamples: number
 	): number[]
 	{
 		var noteAsSamples = [];
 
 		for (var s = 0; s < durationInSamples; s++)
 		{
-			var timeInSeconds = s / samplesPerSecond;
+			var timeInSecondsSinceStartOfNote
+				= s / samplesPerSecond;
+			var timeInSecondsSinceStartOfSequence =
+				offsetInSeconds + timeInSecondsSinceStartOfNote;
 			var sample = this.sampleForFrequencyAndTime
 			(
-				frequencyInHertz, timeInSeconds
+				this, frequencyInHertz, timeInSecondsSinceStartOfSequence
 			);
 			sample *= volumeAsFraction;
 			noteAsSamples.push(sample);
@@ -120,7 +131,7 @@ class SoundSequenceVoice_Instances
 				n: string,
 				pd: string,
 				ob: (v: SoundSequenceVoice, x: any) => any,
-				sffat: (fih: number, tis: number) => number
+				sffat: (v: SoundSequenceVoice, fih: number, tis: number) => number
 			) =>
 				SoundSequenceVoice
 					.fromNameParametersDefaultOscillatorBuildAndSampleForFrequencyAndTime
@@ -271,24 +282,34 @@ class SoundSequenceVoice_Instances
 
 	sampleForFrequencyAndTime_Harmonics
 	(
-		frequencyInHertz: number, timeInSeconds: number
+		voice: SoundSequenceVoice,
+		frequencyInHertz: number,
+		timeInSeconds: number
 	): number
 	{
-		throw new Error("Not yet implemented!");
-
 		var returnValue = 0;
 
-		var absoluteAmplitudesOfHarmonics: number[] = []; // todo
+		var amplitudesOfHarmonicsAsPercentages =
+			voice.parameters.split(",").map(x => parseInt(x) );
 
-		for (var i = 0; i < absoluteAmplitudesOfHarmonics.length; i++)
+		var amplitudesOfHarmonicsAsFractions =
+			amplitudesOfHarmonicsAsPercentages.map(x => x / 100);
+
+		var componentSampleForFrequencyAndTime =
+			(fih: number, tis: number) =>
+				SoundSequenceVoice_Instances
+					.sampleForFrequencyAndTime_SineWave_Static(voice, fih, tis);
+
+		for (var i = 0; i < amplitudesOfHarmonicsAsFractions.length; i++)
 		{
-			var amplitudeOfHarmonic = absoluteAmplitudesOfHarmonics[i];
+			var amplitudeOfHarmonicAsFraction =
+				amplitudesOfHarmonicsAsFractions[i];
 			var frequencyOfHarmonic = frequencyInHertz * (i + 1);
-			var sampleForHarmonic = this.sampleForFrequencyAndTime_SineWave
+			var sampleForHarmonic = componentSampleForFrequencyAndTime
 			(
 				frequencyOfHarmonic, timeInSeconds
 			);
-			sampleForHarmonic *= amplitudeOfHarmonic;
+			sampleForHarmonic *= amplitudeOfHarmonicAsFraction;
 			returnValue += sampleForHarmonic;
 		}
 
@@ -297,14 +318,20 @@ class SoundSequenceVoice_Instances
 
 	sampleForFrequencyAndTime_Noise
 	(
-		frequencyInHertz: number, timeInSeconds: number
+		voice: SoundSequenceVoice,
+		frequencyInHertz: number,
+		timeInSeconds: number
 	): number
 	{
 		return Math.random() * 2 - 1;
 	}
 
-
-	sampleForFrequencyAndTime_SawtoothWave(frequencyInHertz: number, timeInSeconds: number): number
+	sampleForFrequencyAndTime_SawtoothWave
+	(
+		voice: SoundSequenceVoice,
+		frequencyInHertz: number,
+		timeInSeconds: number
+	): number
 	{
 		var secondsPerCycle = 1 / frequencyInHertz;
 		var secondsSinceCycleStarted = timeInSeconds % secondsPerCycle;
@@ -315,7 +342,23 @@ class SoundSequenceVoice_Instances
 		return sample;
 	}
 
-	sampleForFrequencyAndTime_SineWave(frequencyInHertz: number, timeInSeconds: number): number
+	sampleForFrequencyAndTime_SineWave
+	(
+		voice: SoundSequenceVoice,
+		frequencyInHertz: number,
+		timeInSeconds: number
+	): number
+	{
+		return SoundSequenceVoice_Instances
+			.sampleForFrequencyAndTime_SineWave_Static(voice, frequencyInHertz, timeInSeconds);
+	}
+
+	static sampleForFrequencyAndTime_SineWave_Static
+	(
+		voice: SoundSequenceVoice,
+		frequencyInHertz: number,
+		timeInSeconds: number
+	): number
 	{
 		var secondsPerCycle = 1 / frequencyInHertz;
 		var secondsSinceCycleStarted = timeInSeconds % secondsPerCycle;
@@ -329,7 +372,9 @@ class SoundSequenceVoice_Instances
 
 	sampleForFrequencyAndTime_SquareWave
 	(
-		frequencyInHertz: number, timeInSeconds: number
+		voice: SoundSequenceVoice,
+		frequencyInHertz: number,
+		timeInSeconds: number
 	): number
 	{
 		var secondsPerCycle = 1 / frequencyInHertz;
@@ -342,7 +387,9 @@ class SoundSequenceVoice_Instances
 
 	sampleForFrequencyAndTime_TriangleWave
 	(
-		frequencyInHertz: number, timeInSeconds: number
+		voice: SoundSequenceVoice,
+		frequencyInHertz: number,
+		timeInSeconds: number
 	): number
 	{
 		var secondsPerCycle = 1 / frequencyInHertz;
@@ -362,7 +409,6 @@ class SoundSequenceVoice_Instances
 
 		return sample;
 	}
-
 
 }
 

@@ -27,14 +27,15 @@ var ThisCouldBeBetter;
             oscillatorBuild(audio) {
                 return this._oscillatorBuild(this, audio);
             }
-            sampleForFrequencyAndTime(frequencyInHertz, timeInSeconds) {
-                return this._sampleForFrequencyAndTime(frequencyInHertz, timeInSeconds);
+            sampleForFrequencyAndTime(voice, frequencyInHertz, timeInSeconds) {
+                return this._sampleForFrequencyAndTime(voice, frequencyInHertz, timeInSeconds);
             }
-            samplesForNote(samplesPerSecond, durationInSamples, frequencyInHertz, volumeAsFraction) {
+            samplesForNote(samplesPerSecond, offsetInSeconds, frequencyInHertz, volumeAsFraction, durationInSamples) {
                 var noteAsSamples = [];
                 for (var s = 0; s < durationInSamples; s++) {
-                    var timeInSeconds = s / samplesPerSecond;
-                    var sample = this.sampleForFrequencyAndTime(frequencyInHertz, timeInSeconds);
+                    var timeInSecondsSinceStartOfNote = s / samplesPerSecond;
+                    var timeInSecondsSinceStartOfSequence = offsetInSeconds + timeInSecondsSinceStartOfNote;
+                    var sample = this.sampleForFrequencyAndTime(this, frequencyInHertz, timeInSecondsSinceStartOfSequence);
                     sample *= volumeAsFraction;
                     noteAsSamples.push(sample);
                 }
@@ -124,23 +125,25 @@ var ThisCouldBeBetter;
                 return oscillator;
             }
             // Samples.
-            sampleForFrequencyAndTime_Harmonics(frequencyInHertz, timeInSeconds) {
-                throw new Error("Not yet implemented!");
+            sampleForFrequencyAndTime_Harmonics(voice, frequencyInHertz, timeInSeconds) {
                 var returnValue = 0;
-                var absoluteAmplitudesOfHarmonics = []; // todo
-                for (var i = 0; i < absoluteAmplitudesOfHarmonics.length; i++) {
-                    var amplitudeOfHarmonic = absoluteAmplitudesOfHarmonics[i];
+                var amplitudesOfHarmonicsAsPercentages = voice.parameters.split(",").map(x => parseInt(x));
+                var amplitudesOfHarmonicsAsFractions = amplitudesOfHarmonicsAsPercentages.map(x => x / 100);
+                var componentSampleForFrequencyAndTime = (fih, tis) => SoundSequenceVoice_Instances
+                    .sampleForFrequencyAndTime_SineWave_Static(voice, fih, tis);
+                for (var i = 0; i < amplitudesOfHarmonicsAsFractions.length; i++) {
+                    var amplitudeOfHarmonicAsFraction = amplitudesOfHarmonicsAsFractions[i];
                     var frequencyOfHarmonic = frequencyInHertz * (i + 1);
-                    var sampleForHarmonic = this.sampleForFrequencyAndTime_SineWave(frequencyOfHarmonic, timeInSeconds);
-                    sampleForHarmonic *= amplitudeOfHarmonic;
+                    var sampleForHarmonic = componentSampleForFrequencyAndTime(frequencyOfHarmonic, timeInSeconds);
+                    sampleForHarmonic *= amplitudeOfHarmonicAsFraction;
                     returnValue += sampleForHarmonic;
                 }
                 return returnValue;
             }
-            sampleForFrequencyAndTime_Noise(frequencyInHertz, timeInSeconds) {
+            sampleForFrequencyAndTime_Noise(voice, frequencyInHertz, timeInSeconds) {
                 return Math.random() * 2 - 1;
             }
-            sampleForFrequencyAndTime_SawtoothWave(frequencyInHertz, timeInSeconds) {
+            sampleForFrequencyAndTime_SawtoothWave(voice, frequencyInHertz, timeInSeconds) {
                 var secondsPerCycle = 1 / frequencyInHertz;
                 var secondsSinceCycleStarted = timeInSeconds % secondsPerCycle;
                 var fractionOfCycleComplete = secondsSinceCycleStarted / secondsPerCycle;
@@ -148,7 +151,11 @@ var ThisCouldBeBetter;
                 sample = sample * 2 - 1;
                 return sample;
             }
-            sampleForFrequencyAndTime_SineWave(frequencyInHertz, timeInSeconds) {
+            sampleForFrequencyAndTime_SineWave(voice, frequencyInHertz, timeInSeconds) {
+                return SoundSequenceVoice_Instances
+                    .sampleForFrequencyAndTime_SineWave_Static(voice, frequencyInHertz, timeInSeconds);
+            }
+            static sampleForFrequencyAndTime_SineWave_Static(voice, frequencyInHertz, timeInSeconds) {
                 var secondsPerCycle = 1 / frequencyInHertz;
                 var secondsSinceCycleStarted = timeInSeconds % secondsPerCycle;
                 var fractionOfCycleComplete = secondsSinceCycleStarted / secondsPerCycle;
@@ -156,14 +163,14 @@ var ThisCouldBeBetter;
                 var sample = Math.sin(radiansSinceCycleStarted);
                 return sample;
             }
-            sampleForFrequencyAndTime_SquareWave(frequencyInHertz, timeInSeconds) {
+            sampleForFrequencyAndTime_SquareWave(voice, frequencyInHertz, timeInSeconds) {
                 var secondsPerCycle = 1 / frequencyInHertz;
                 var secondsSinceCycleStarted = timeInSeconds % secondsPerCycle;
                 var fractionOfCycleComplete = secondsSinceCycleStarted / secondsPerCycle;
                 var sample = (fractionOfCycleComplete <= .5 ? 1 : -1);
                 return sample;
             }
-            sampleForFrequencyAndTime_TriangleWave(frequencyInHertz, timeInSeconds) {
+            sampleForFrequencyAndTime_TriangleWave(voice, frequencyInHertz, timeInSeconds) {
                 var secondsPerCycle = 1 / frequencyInHertz;
                 var secondsSinceCycleStarted = timeInSeconds % secondsPerCycle;
                 var fractionOfCycleComplete = secondsSinceCycleStarted / secondsPerCycle;

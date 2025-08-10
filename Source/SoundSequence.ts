@@ -141,16 +141,21 @@ export class SoundSequence
 
 	toSamples(samplesPerSecond: number, durationInSamples: number): number[]
 	{
-		var notesAsSamplesNormalized =
-			this.notes.map
-			(
-				x =>
-					x.toSamples(this.voice, samplesPerSecond)
-			);
-
 		var sequenceAsSamplesNormalized: number[] = [];
 
-		notesAsSamplesNormalized.forEach(x => sequenceAsSamplesNormalized.push(...x) );
+		var offsetInSecondsSoFar = 0;
+
+		this.notes.forEach
+		(
+			note =>
+			{
+				var noteAsSamples =
+					note.toSamples(this.voice, samplesPerSecond, offsetInSecondsSoFar);
+				sequenceAsSamplesNormalized.push(...noteAsSamples);
+				var noteDurationInSeconds = note.durationInSeconds;
+				offsetInSecondsSoFar += noteDurationInSeconds;
+			}
+		);
 
 		return sequenceAsSamplesNormalized;
 	}
