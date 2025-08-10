@@ -80,14 +80,22 @@
 	</table>
 
 	<div>
-		<button onclick="UiEventHandler.buttonPlay_Clicked();">Play</button>
+		<button onclick="UiEventHandler.buttonPlayAsAudioContext_Clicked();">Play with AudioContext</button>
+		<button onclick="UiEventHandler.buttonPlayAsWavFile_Clicked();">Play as WAV File</button>
 	</div>
 </div>
+
+<script type="text/javascript" src="WavFileViewer/Source/Base64Encoder.js"></script>
+<script type="text/javascript" src="WavFileViewer/Source/ByteConverter.js"></script>
+<script type="text/javascript" src="WavFileViewer/Source/ByteStreamLittleEndian.js"></script>
+<script type="text/javascript" src="WavFileViewer/Source/SoundFromWavFile.js"></script>
+<script type="text/javascript" src="WavFileViewer/Source/WavFile.js"></script>
 
 <script type="text/javascript" src="SoundSequence.js"></script>
 <script type="text/javascript" src="SoundSequenceNote.js"></script>
 <script type="text/javascript" src="SoundSequenceVoice.js"></script>
 <script type="text/javascript" src="UiEventHandler.js"></script>
+
 <script type="text/javascript" src="_Imports.js"></script>
 
 </body>

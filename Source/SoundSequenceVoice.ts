@@ -49,10 +49,57 @@ export class SoundSequenceVoice
 		return this.Instances().byName(name);
 	}
 
+	// AudioContext.
+
 	oscillatorBuild(audio: any): any
 	{
 		return this._oscillatorBuild(this, audio);
 	}
+
+	// Samples.
+
+	static RadiansPerCycle = 2 * Math.PI;
+
+	sampleForFrequencyAndTime
+	(
+		frequencyInHertz: number, timeInSeconds: number
+	): number
+	{
+		// hack - Sine wave.
+		var secondsPerCycle = 1 / frequencyInHertz;
+		var secondsSinceCycleStarted = timeInSeconds % secondsPerCycle;
+		var fractionOfCycleComplete =
+			secondsSinceCycleStarted / secondsPerCycle;
+		var radiansSinceCycleStarted =
+			SoundSequenceVoice.RadiansPerCycle * fractionOfCycleComplete;
+		var sample = Math.sin(radiansSinceCycleStarted);
+		return sample;
+	}
+
+	samplesForNote
+	(
+		samplesPerSecond: number,
+		durationInSamples: number,
+		frequencyInHertz: number,
+		volumeAsFraction: number
+	): number[]
+	{
+		var noteAsSamples = [];
+
+		for (var s = 0; s < durationInSamples; s++)
+		{
+			var timeInSeconds = s / samplesPerSecond;
+			var sample = this.sampleForFrequencyAndTime
+			(
+				frequencyInHertz, timeInSeconds
+			);
+			sample *= volumeAsFraction;
+			noteAsSamples.push(sample);
+		}
+
+		return noteAsSamples;
+	}
+
 }
 
 class SoundSequenceVoice_Instances

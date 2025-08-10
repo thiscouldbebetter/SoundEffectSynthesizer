@@ -17,6 +17,11 @@ var ThisCouldBeBetter;
                 gain.gain.setValueAtTime(this.volumeAsFractionOfMax, this.offsetInSeconds);
                 oscillator.frequency.setValueAtTime(this.pitchInHertz, this.offsetInSeconds);
             }
+            toSamples(voice, samplesPerSecond) {
+                var durationInSamples = samplesPerSecond * this.durationInSeconds;
+                var noteAsSamples = voice.samplesForNote(samplesPerSecond, durationInSamples, this.pitchInHertz, this.volumeAsFractionOfMax);
+                return noteAsSamples;
+            }
         }
         SoundEffectSynthesizer.SoundSequenceNote = SoundSequenceNote;
     })(SoundEffectSynthesizer = ThisCouldBeBetter.SoundEffectSynthesizer || (ThisCouldBeBetter.SoundEffectSynthesizer = {}));

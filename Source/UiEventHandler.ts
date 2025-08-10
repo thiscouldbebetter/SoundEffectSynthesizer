@@ -38,40 +38,26 @@ export class UiEventHandler
 		this.selectVoice_Changed(selectVoice);
 	}
 
-	static buttonPlay_Clicked(): void
+	static buttonPlayAsAudioContext_Clicked(): void
 	{
-		var d = document;
-
-		var inputName: any =
-			d.getElementById("inputName");
-		var name = inputName.value;
-
-		var inputDurationInSeconds: any =
-			d.getElementById("inputDurationInSeconds");
-		var durationInSeconds = parseFloat(inputDurationInSeconds.value);
-
-		var selectVoice: any = d.getElementById("selectVoice");
-		var voiceName = selectVoice.value;
-		var voice = SoundSequenceVoice.byName(voiceName);
-
-		var inputPitchesBySegment: any =
-			d.getElementById("inputPitchesBySegmentInHertz");
-		var pitchesBySegmentAsString = inputPitchesBySegment.value;
-
-		var inputVolumesBySegment: any =
-			d.getElementById("inputVolumesBySegmentAsPercentages");
-		var volumesBySegmentAsString = inputVolumesBySegment.value;
-
-		var sequence = SoundSequence.fromNameDurationVoiceAndStringsForPitchesAndDurations
-		(
-			name,
-			durationInSeconds,
-			voice,
-			pitchesBySegmentAsString,
-			volumesBySegmentAsString
-		);
+		var sequence = UiEventHandler.soundSequenceFromDom();
 
 		sequence.play();
+	}
+
+	static buttonPlayAsWavFile_Clicked(): void
+	{
+		var sequence = UiEventHandler.soundSequenceFromDom();
+
+		var sequenceAsWavFile = sequence.toWavFile();
+
+		var wfv = WavFileViewer;
+		var SoundFromWavFile = wfv.SoundFromWavFile;
+
+		var sequenceAsSound =
+			SoundFromWavFile.fromWavFile(sequenceAsWavFile);
+
+		sequenceAsSound.play();
 	}
 
 	static selectSampleEffect_Changed(selectSampleEffect: any): void
@@ -115,6 +101,44 @@ export class UiEventHandler
 			d.getElementById("inputVoiceParameters");
 
 		inputVoiceParameters.value = voice.parametersDefault;
+	}
+
+	// Helpers.
+
+	static soundSequenceFromDom(): SoundSequence
+	{
+		var d = document;
+
+		var inputName: any =
+			d.getElementById("inputName");
+		var name = inputName.value;
+
+		var inputDurationInSeconds: any =
+			d.getElementById("inputDurationInSeconds");
+		var durationInSeconds = parseFloat(inputDurationInSeconds.value);
+
+		var selectVoice: any = d.getElementById("selectVoice");
+		var voiceName = selectVoice.value;
+		var voice = SoundSequenceVoice.byName(voiceName);
+
+		var inputPitchesBySegment: any =
+			d.getElementById("inputPitchesBySegmentInHertz");
+		var pitchesBySegmentAsString = inputPitchesBySegment.value;
+
+		var inputVolumesBySegment: any =
+			d.getElementById("inputVolumesBySegmentAsPercentages");
+		var volumesBySegmentAsString = inputVolumesBySegment.value;
+
+		var sequence = SoundSequence.fromNameDurationVoiceAndStringsForPitchesAndDurations
+		(
+			name,
+			durationInSeconds,
+			voice,
+			pitchesBySegmentAsString,
+			volumesBySegmentAsString
+		);
+
+		return sequence;
 	}
 }
 

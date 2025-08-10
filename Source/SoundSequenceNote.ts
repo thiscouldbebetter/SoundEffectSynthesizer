@@ -49,6 +49,24 @@ export class SoundSequenceNote
 			this.pitchInHertz, this.offsetInSeconds
 		);
 	}
+
+	toSamples
+	(
+		voice: SoundSequenceVoice,
+		samplesPerSecond: number
+	): number[]
+	{
+		var durationInSamples =
+			samplesPerSecond * this.durationInSeconds;
+		var noteAsSamples = voice.samplesForNote
+		(
+			samplesPerSecond,
+			durationInSamples,
+			this.pitchInHertz,
+			this.volumeAsFractionOfMax
+		);
+		return noteAsSamples;
+	}
 }
 
 }

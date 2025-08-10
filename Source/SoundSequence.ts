@@ -137,6 +137,52 @@ export class SoundSequence
 		return this.notes.map(x => x.volumeAsFractionOfMax * 100).join("\n");
 	}
 
+	// WavFile.
+
+	toSamples(samplesPerSecond: number, durationInSamples: number): number[]
+	{
+		var notesAsSamplesNormalized =
+			this.notes.map
+			(
+				x =>
+					x.toSamples(this.voice, samplesPerSecond)
+			);
+
+		var sequenceAsSamplesNormalized: number[] = [];
+
+		notesAsSamplesNormalized.forEach(x => sequenceAsSamplesNormalized.push(...x) );
+
+		return sequenceAsSamplesNormalized;
+	}
+
+	toWavFile(): WavFile
+	{
+		var wfv = WavFileViewer;
+		var WavFileSamplingInfo = wfv.WavFileSamplingInfo;
+		var WavFile = wfv.WavFile;
+
+		var samplingInfo = WavFileSamplingInfo.default(); // todo
+
+		var samplesPerSecond = samplingInfo.samplesPerSecond;
+		var durationInSamples =
+			this.durationInSeconds * samplesPerSecond;
+
+		var samplesNormalized =
+			this.toSamples(samplesPerSecond, durationInSamples);
+
+		var samplesDenormalized =
+			samplingInfo.samplesDenormalize(samplesNormalized);
+
+		var samplesForChannels = [ samplesDenormalized ];
+
+		var wavFile = WavFile.fromSamplingInfoAndSamplesForChannels
+		(
+			samplingInfo,
+			samplesForChannels
+		);
+
+		return wavFile;
+	}
 }
 
 class SoundSequence_Instances

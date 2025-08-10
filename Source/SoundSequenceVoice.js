@@ -22,10 +22,32 @@ var ThisCouldBeBetter;
             static byName(name) {
                 return this.Instances().byName(name);
             }
+            // AudioContext.
             oscillatorBuild(audio) {
                 return this._oscillatorBuild(this, audio);
             }
+            sampleForFrequencyAndTime(frequencyInHertz, timeInSeconds) {
+                // hack - Sine wave.
+                var secondsPerCycle = 1 / frequencyInHertz;
+                var secondsSinceCycleStarted = timeInSeconds % secondsPerCycle;
+                var fractionOfCycleComplete = secondsSinceCycleStarted / secondsPerCycle;
+                var radiansSinceCycleStarted = SoundSequenceVoice.RadiansPerCycle * fractionOfCycleComplete;
+                var sample = Math.sin(radiansSinceCycleStarted);
+                return sample;
+            }
+            samplesForNote(samplesPerSecond, durationInSamples, frequencyInHertz, volumeAsFraction) {
+                var noteAsSamples = [];
+                for (var s = 0; s < durationInSamples; s++) {
+                    var timeInSeconds = s / samplesPerSecond;
+                    var sample = this.sampleForFrequencyAndTime(frequencyInHertz, timeInSeconds);
+                    sample *= volumeAsFraction;
+                    noteAsSamples.push(sample);
+                }
+                return noteAsSamples;
+            }
         }
+        // Samples.
+        SoundSequenceVoice.RadiansPerCycle = 2 * Math.PI;
         SoundEffectSynthesizer.SoundSequenceVoice = SoundSequenceVoice;
         class SoundSequenceVoice_Instances {
             constructor() {
