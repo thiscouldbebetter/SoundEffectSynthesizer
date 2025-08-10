@@ -4,14 +4,15 @@ var ThisCouldBeBetter;
     var SoundEffectSynthesizer;
     (function (SoundEffectSynthesizer) {
         class SoundSequenceVoice {
-            constructor(name, parametersDefault, oscillatorBuild) {
+            constructor(name, parametersDefault, oscillatorBuild, sampleForFrequencyAndTime) {
                 this.name = name;
                 this.parametersDefault = parametersDefault || "";
                 this._oscillatorBuild = oscillatorBuild;
+                this._sampleForFrequencyAndTime = sampleForFrequencyAndTime;
                 this.parameters = parametersDefault;
             }
-            static fromNameParametersDefaultAndOscillatorBuild(name, parametersDefault, oscillatorBuild) {
-                return new SoundSequenceVoice(name, parametersDefault, oscillatorBuild);
+            static fromNameParametersDefaultOscillatorBuildAndSampleForFrequencyAndTime(name, parametersDefault, oscillatorBuild, sampleForFrequencyAndTime) {
+                return new SoundSequenceVoice(name, parametersDefault, oscillatorBuild, sampleForFrequencyAndTime);
             }
             static Instances() {
                 if (this._instances == null) {
@@ -27,13 +28,7 @@ var ThisCouldBeBetter;
                 return this._oscillatorBuild(this, audio);
             }
             sampleForFrequencyAndTime(frequencyInHertz, timeInSeconds) {
-                // hack - Sine wave.
-                var secondsPerCycle = 1 / frequencyInHertz;
-                var secondsSinceCycleStarted = timeInSeconds % secondsPerCycle;
-                var fractionOfCycleComplete = secondsSinceCycleStarted / secondsPerCycle;
-                var radiansSinceCycleStarted = SoundSequenceVoice.RadiansPerCycle * fractionOfCycleComplete;
-                var sample = Math.sin(radiansSinceCycleStarted);
-                return sample;
+                return this._sampleForFrequencyAndTime(frequencyInHertz, timeInSeconds);
             }
             samplesForNote(samplesPerSecond, durationInSamples, frequencyInHertz, volumeAsFraction) {
                 var noteAsSamples = [];
@@ -51,13 +46,15 @@ var ThisCouldBeBetter;
         SoundEffectSynthesizer.SoundSequenceVoice = SoundSequenceVoice;
         class SoundSequenceVoice_Instances {
             constructor() {
-                var v = (n, pd, ob) => SoundSequenceVoice.fromNameParametersDefaultAndOscillatorBuild(n, pd, ob);
-                this.Harmonics = v("Harmonics", "0,40,40,100,100,100,30,70,60,50,90,80", this.oscillatorBuild_Harmonics);
-                this.Noise = v("Noise", null, this.oscillatorBuild_Noise);
-                this.SawtoothWave = v("Sawtooth Wave", null, this.oscillatorBuild_SawtoothWave);
-                this.SineWave = v("Sine Wave", null, this.oscillatorBuild_SineWave);
-                this.SquareWave = v("Square Wave", null, this.oscillatorBuild_SquareWave);
-                this.TriangleWave = v("Triangle Wave", null, this.oscillatorBuild_TriangleWave);
+                var v = (n, pd, ob, sffat) => SoundSequenceVoice
+                    .fromNameParametersDefaultOscillatorBuildAndSampleForFrequencyAndTime(n, pd, ob, sffat);
+                this.Harmonics = v("Harmonics", "0,40,40,100,100,100,30,70,60,50,90,80", this.oscillatorBuild_Harmonics, this.sampleForFrequencyAndTime_Harmonics // todo
+                );
+                this.Noise = v("Noise", null, this.oscillatorBuild_Noise, this.sampleForFrequencyAndTime_Noise);
+                this.SawtoothWave = v("Sawtooth Wave", null, this.oscillatorBuild_SawtoothWave, this.sampleForFrequencyAndTime_SawtoothWave);
+                this.SineWave = v("Sine Wave", null, this.oscillatorBuild_SineWave, this.sampleForFrequencyAndTime_SineWave);
+                this.SquareWave = v("Square Wave", null, this.oscillatorBuild_SquareWave, this.sampleForFrequencyAndTime_SquareWave);
+                this.TriangleWave = v("Triangle Wave", null, this.oscillatorBuild_TriangleWave, this.sampleForFrequencyAndTime_TriangleWave);
                 this._All =
                     [
                         this.Harmonics,
@@ -125,6 +122,60 @@ var ThisCouldBeBetter;
                 var oscillator = audio.createOscillator();
                 oscillator.type = "triangle";
                 return oscillator;
+            }
+            // Samples.
+            sampleForFrequencyAndTime_Harmonics(frequencyInHertz, timeInSeconds) {
+                throw new Error("Not yet implemented!");
+                var returnValue = 0;
+                var absoluteAmplitudesOfHarmonics = []; // todo
+                for (var i = 0; i < absoluteAmplitudesOfHarmonics.length; i++) {
+                    var amplitudeOfHarmonic = absoluteAmplitudesOfHarmonics[i];
+                    var frequencyOfHarmonic = frequencyInHertz * (i + 1);
+                    var sampleForHarmonic = this.sampleForFrequencyAndTime_SineWave(frequencyOfHarmonic, timeInSeconds);
+                    sampleForHarmonic *= amplitudeOfHarmonic;
+                    returnValue += sampleForHarmonic;
+                }
+                return returnValue;
+            }
+            sampleForFrequencyAndTime_Noise(frequencyInHertz, timeInSeconds) {
+                return Math.random() * 2 - 1;
+            }
+            sampleForFrequencyAndTime_SawtoothWave(frequencyInHertz, timeInSeconds) {
+                var secondsPerCycle = 1 / frequencyInHertz;
+                var secondsSinceCycleStarted = timeInSeconds % secondsPerCycle;
+                var fractionOfCycleComplete = secondsSinceCycleStarted / secondsPerCycle;
+                var sample = fractionOfCycleComplete;
+                sample = sample * 2 - 1;
+                return sample;
+            }
+            sampleForFrequencyAndTime_SineWave(frequencyInHertz, timeInSeconds) {
+                var secondsPerCycle = 1 / frequencyInHertz;
+                var secondsSinceCycleStarted = timeInSeconds % secondsPerCycle;
+                var fractionOfCycleComplete = secondsSinceCycleStarted / secondsPerCycle;
+                var radiansSinceCycleStarted = SoundSequenceVoice.RadiansPerCycle * fractionOfCycleComplete;
+                var sample = Math.sin(radiansSinceCycleStarted);
+                return sample;
+            }
+            sampleForFrequencyAndTime_SquareWave(frequencyInHertz, timeInSeconds) {
+                var secondsPerCycle = 1 / frequencyInHertz;
+                var secondsSinceCycleStarted = timeInSeconds % secondsPerCycle;
+                var fractionOfCycleComplete = secondsSinceCycleStarted / secondsPerCycle;
+                var sample = (fractionOfCycleComplete <= .5 ? 1 : -1);
+                return sample;
+            }
+            sampleForFrequencyAndTime_TriangleWave(frequencyInHertz, timeInSeconds) {
+                var secondsPerCycle = 1 / frequencyInHertz;
+                var secondsSinceCycleStarted = timeInSeconds % secondsPerCycle;
+                var fractionOfCycleComplete = secondsSinceCycleStarted / secondsPerCycle;
+                var sample;
+                if (fractionOfCycleComplete <= .5) {
+                    sample = fractionOfCycleComplete;
+                }
+                else {
+                    sample = 1 - fractionOfCycleComplete;
+                }
+                sample = sample * 4 - 1;
+                return sample;
             }
         }
     })(SoundEffectSynthesizer = ThisCouldBeBetter.SoundEffectSynthesizer || (ThisCouldBeBetter.SoundEffectSynthesizer = {}));
